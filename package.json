@@ -1,0 +1,48 @@
+{
+  "name": "iot-workshop",
+  "version": "0.1.0",
+  "description": "An introduction to embedded and iot",
+  "homepage": "http://metcalfbuilt.com/iot-workshop/",
+  "author": {
+    "name": "Ian Metcalf",
+    "url": "http://metcalfbuilt.com"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ianmetcalf/iot-workshop.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ianmetcalf/iot-workshop/issues"
+  },
+  "scripts": {
+    "install:theme": "node ./scripts/theme",
+    "build": "node ./scripts/builder",
+    "build:gh-pages": "PREFIX=iot-workshop node ./scripts/builder",
+    "build:offline": "OFFLINE=offline.json node ./scripts/builder",
+    "start": "nodemon -e js,md,scss -x 'npm run build'",
+    "predeploy": "npm run build:gh-pages",
+    "deploy": "gh-pages -d build -m 'Auto-generated'"
+  },
+  "devDependencies": {
+    "fs-extra": "^5.0.0",
+    "gh-clone": "^1.0.0",
+    "gh-pages": "^1.1.0",
+    "gray-matter": "^4.0.1",
+    "hekyll": "^3.0.3",
+    "is-utf8": "^0.2.1",
+    "js-yaml": "^3.11.0",
+    "jstransformer-handlebars": "^1.1.0",
+    "marked": "^0.3.19",
+    "metalsmith": "^2.3.0",
+    "metalsmith-assets": "^0.1.0",
+    "metalsmith-concat": "^6.0.0",
+    "metalsmith-layouts": "^2.1.0",
+    "metalsmith-metallic": "^2.0.2",
+    "metalsmith-permalinks": "^0.5.0",
+    "metalsmith-prefix": "^1.0.3",
+    "metalsmith-renamer": "^0.4.0",
+    "metalsmith-sass": "^1.5.1",
+    "nodemon": "^1.17.3"
+  }
+}
