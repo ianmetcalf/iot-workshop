@@ -20,7 +20,9 @@
     "build": "node ./scripts/builder",
     "build:gh-pages": "PREFIX=iot-workshop node ./scripts/builder",
     "build:offline": "OFFLINE=offline.json node ./scripts/builder",
-    "start": "nodemon -e js,md,scss -x 'npm run build'",
+    "start": "nodemon -e js,md,scss,ino -x 'npm run build'",
+    "test": "node ./scripts/test",
+    "test:watch": "nodemon -e ino -x 'node ./scripts/test | tap-dot'",
     "predeploy": "npm run build:gh-pages",
     "deploy": "gh-pages -d build -m 'Auto-generated'"
   },
@@ -28,6 +30,7 @@
     "fs-extra": "^5.0.0",
     "gh-clone": "^1.0.0",
     "gh-pages": "^1.1.0",
+    "glob": "^7.1.2",
     "gray-matter": "^4.0.1",
     "hekyll": "^3.0.3",
     "is-utf8": "^0.2.1",
@@ -43,6 +46,10 @@
     "metalsmith-prefix": "^1.0.3",
     "metalsmith-renamer": "^0.4.0",
     "metalsmith-sass": "^1.5.1",
-    "nodemon": "^1.17.3"
+    "minimatch": "^3.0.4",
+    "nodemon": "^1.17.3",
+    "tap-dot": "^1.0.5",
+    "tape": "^4.9.0",
+    "tape-spawn": "^1.4.2"
   }
 }

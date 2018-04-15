@@ -1,0 +1,38 @@
+language: node_js
+
+node_js:
+  - lts/*
+
+env:
+  global:
+    - IDE_VERSION=1.8.5
+
+before_install:
+  - wget --quiet https://downloads.arduino.cc/arduino-$IDE_VERSION-linux64.tar.xz
+  - tar xf arduino-$IDE_VERSION-linux64.tar.xz
+  - mv arduino-$IDE_VERSION $HOME/arduino_ide
+  - export PATH="$HOME/arduino_ide:$PATH"
+
+install:
+  - arduino --pref "boardsmanager.additional.urls=https://adafruit.github.io/arduino-board-index/package_adafruit_index.json,http://arduino.esp8266.com/stable/package_esp8266com_index.json" --save-prefs
+  - arduino --install-boards arduino:samd
+  - arduino --install-boards adafruit:samd
+  - arduino --install-boards adafruit:wiced
+  - arduino --install-boards esp8266:esp8266
+  - mkdir -p $HOME/Arduino/hardware/espressif
+  - cd $HOME/Arduino/hardware/espressif
+  - git clone https://github.com/espressif/arduino-esp32.git esp32
+  - cd esp32/tools
+  - python get.py
+  - cd $TRAVIS_BUILD_DIR
+  - arduino --install-library "WiFi101","PubSubClient","Adafruit Unified Sensor","Adafruit BMP085 Unified","Adafruit BMP280 Library","Adafruit HTU21DF Library","Adafruit SHT31 Library","Adafruit SSD1306","Adafruit GFX Library"
+  - git clone https://github.com/adafruit/Adafruit_FeatherOLED.git $HOME/Arduino/libraries/Adafruit_FeatherOLED
+  - yarn install
+
+script:
+  - npm run test
+
+notifications:
+  email:
+    on_success: change
+    on_failure: change

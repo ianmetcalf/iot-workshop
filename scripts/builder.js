@@ -11,6 +11,7 @@ const prefixer = require('metalsmith-prefix');
 const renamer = require('metalsmith-renamer');
 const sass = require('metalsmith-sass');
 const assets = require('../lib/plugins/assets');
+const code = require('../lib/plugins/code');
 const markdown = require('../lib/plugins/markdown');
 const helpers = require('../lib/handlebars/helpers');
 const meta = require('./meta');
@@ -23,10 +24,19 @@ builder.source('./');
 builder.ignore([
   'node_modules',
   'theme',
-  '!*.+(html|md)',
+  '!*.+(html|md|ino)',
 ]);
 
+builder.use(code({
+  pattern: 'examples/**/*.ino',
+  language: 'c',
+}));
+
 builder.use(renamer({
+  examples: {
+    pattern: 'examples/**/*.md',
+    rename: 'index.md',
+  },
   readme: {
     pattern: '**/README.md',
     rename: 'index.md',

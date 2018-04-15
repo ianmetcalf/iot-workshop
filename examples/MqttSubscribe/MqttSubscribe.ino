@@ -1,22 +1,9 @@
-# Subscribe to an MQTT Broker
+/*********************************************************************
 
-## Getting Setup
+  Example: Subscribe to an Mqtt Broker
 
-*NOTE: This step is not needed if you are using the WICED Wifi Feather board*
+*********************************************************************/
 
-* Download the [PubSubClient](https://pubsubclient.knolleary.net) library from [here](https://github.com/knolleary/pubsubclient/archive/master.zip)
-
-* Uncompress the folder and rename it `pubsubclient`
-
-* Place the folder in your `arduinosketchfolder/libraries/` folder
-
-## Code
-
-* Open the Arduino IDE and start a new sketch
-
-* At the top define the following includes and macros
-
-```c
 #ifdef ARDUINO_SAMD_FEATHER_M0
   #include <WiFi101.h>
 #endif
@@ -40,24 +27,24 @@
   #include <adafruit_feather.h>
   #include <adafruit_mqtt.h>
 
+  #define LED_BUILTIN BOARD_LED_PIN
+
   #define connectWiFi(args...) Feather.connect(args)
   #define isWiFiConnected() Feather.connected()
 #endif
-```
 
-* Then define the following constants
+#ifdef ARDUINO_ARCH_ESP8266
+  #define toggleLED(on) digitalWrite(LED_BUILTIN, (on) ? LOW : HIGH);
+#else
+  #define toggleLED(on) digitalWrite(LED_BUILTIN, (on) ? HIGH : LOW);
+#endif
 
-```c
 const char* ssid = "iot workshop";
 const char* password = "burlingtoncode";
 
 const char* broker = "broker.local.lan";
 const char* clientId = "<insert name>";
-```
 
-* And initialize the mqtt client
-
-```c
 #ifndef ARDUINO_ARCH_WICED
   WiFiClient wifiClient;
   PubSubClient mqtt(wifiClient);
@@ -72,17 +59,16 @@ const char* clientId = "<insert name>";
   #define connectMQTT(id, args...) (mqtt.clientID(id), mqtt.connect(args))
   #define subscribeMQTT(topic, handler) mqtt.subscribe(topic, MQTT_QOS_AT_MOST_ONCE, handler)
 #endif
-```
 
-* Then define the setup function
-
-```c
 void setup() {
   Serial.begin(57600);
 
   while (!Serial) {
     delay(1);
   }
+
+  pinMode(LED_BUILTIN, OUTPUT);
+  toggleLED(false);
 
   #ifdef ARDUINO_SAMD_FEATHER_M0
   WiFi.setPins(8, 7, 4, 2);
@@ -122,11 +108,7 @@ void setup() {
 
   Serial.println("done");
 }
-```
 
-* And a handler for the mqtt subscription
-
-```c
 #ifndef ARDUINO_ARCH_WICED
 void handler(char* topic, byte* payload, unsigned int length) {
   Serial.print("Control says: ");
@@ -134,6 +116,14 @@ void handler(char* topic, byte* payload, unsigned int length) {
     Serial.print((char)payload[i]);
   }
   Serial.println();
+
+  if (strncmp((char*)payload, "on", length) == 0) {
+    toggleLED(true);
+  }
+
+  if (strncmp((char*)payload, "off", length) == 0) {
+    toggleLED(false);
+  }
 }
 #endif
 
@@ -141,28 +131,38 @@ void handler(char* topic, byte* payload, unsigned int length) {
 void handler(UTF8String topic, UTF8String message) {
   Serial.print("Control says: ");
   Serial.println(message);
+
+  if (message == "on") {
+    toggleLED(true);
+  }
+
+  if (message == "off") {
+    toggleLED(false);
+  }
 }
 #endif
-```
 
-* Finally define the loop function
-
-```c
 void loop() {
+  checkConnection();
+
   #ifndef ARDUINO_ARCH_WICED
   mqtt.loop();
   #endif
 }
-```
 
-* A full example can be found [here](/examples/MqttSubscribe)
+void checkConnection() {
+  unsigned long now = millis();
+  static unsigned long last = 0;
 
-## Try It
+  if (now - last >= 10000) {
+    if (!isWiFiConnected()) {
+      connectWiFi(ssid, password);
+    }
 
-* Load the program onto the microcontroller using the Arduino IDE
+    if (isWiFiConnected() && !mqtt.connected()) {
+      connectMQTT(clientId, broker, 1883);
+    }
 
-* Open the MQTT [browser client](http://www.hivemq.com/demos/websocket-client/)
-
-* Connect to the broker and publish to your control topic
-
-* You should see your message in the serial monitor
+    last = now;
+  }
+}

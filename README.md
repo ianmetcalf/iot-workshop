@@ -1,5 +1,7 @@
 # Intro to Embedded/IOT Workshop
 
+[![Build Status](https://travis-ci.org/ianmetcalf/iot-workshop.svg?branch=master)](https://travis-ci.org/ianmetcalf/iot-workshop)
+
 ## Microcontrollers
 
 ##### [Adafruit M0 Basic Feather](/boards/feather-m0-basic.md)
