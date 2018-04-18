@@ -4,7 +4,6 @@ const os = require('os');
 const path = require('path');
 const fs = require('fs-extra');
 const clone = require('gh-clone');
-const hekyll = require('hekyll');
 const yaml = require('js-yaml');
 
 async function fromConfig(file) {
@@ -20,16 +19,8 @@ async function fromConfig(file) {
 }
 
 async function install(repo, dest) {
-  const tmp = path.join(os.tmpdir(), repo);
-
-  await fs.remove(tmp);
-  await clone({repo, dest: tmp});
-
   await fs.remove(dest);
-  await hekyll.build({
-    cwd: tmp,
-    destBase: dest,
-  });
+  await clone({repo, dest});
 }
 
 async function fixUp(file, replacements) {
@@ -60,9 +51,11 @@ if (require.main === module) {
   .then(() => {
     console.log('Theme installed');
 
-    return fixUp('./theme/_layouts/default.hbs', {
-      '{% body %}': '{{{ contents }}}',
-      '<p class="copyright">{{default site.title': '<p class="copyright">{{',
+    return fixUp('./theme/_layouts/default.html', {
+      '{{ content }}': '{{ contents }}',
+      '<p class="copyright">{{ site.title | default:': '<p class="copyright">{{',
+      '/assets/css': '/css',
+      '{% seo %}': '',
     });
   })
 

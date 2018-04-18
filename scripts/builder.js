@@ -4,7 +4,6 @@ const path = require('path');
 const url = require('url');
 const Metalsmith = require('metalsmith');
 const concat = require('metalsmith-concat');
-const layouts = require('metalsmith-layouts');
 const metallic = require('metalsmith-metallic');
 const permalinks = require('metalsmith-permalinks');
 const prefixer = require('metalsmith-prefix');
@@ -13,7 +12,6 @@ const sass = require('metalsmith-sass');
 const assets = require('../lib/plugins/assets');
 const code = require('../lib/plugins/code');
 const markdown = require('../lib/plugins/markdown');
-const helpers = require('../lib/handlebars/helpers');
 const meta = require('./meta');
 
 const builder = Metalsmith(path.resolve(__dirname, '..'));
@@ -52,19 +50,12 @@ if (process.env.OFFLINE) {
 }
 
 builder.use(markdown({
+  layout: 'theme/_layouts/default.html',
   offline,
 }));
 
 builder.use(permalinks({
   relative: false,
-}));
-
-builder.use(layouts({
-  directory: 'theme/_layouts',
-  default: 'default.hbs',
-  engineOptions: {
-    helpers,
-  },
 }));
 
 if (process.env.PREFIX) {
