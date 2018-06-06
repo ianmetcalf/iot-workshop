@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en-US">
+
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,maximum-scale=2">
+    <link rel="stylesheet" type="text/css" media="screen" href="/iot-workshop/css/style.css?v=0.1.0">
+
+
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/ianmetcalf/iot-workshop">View on GitHub</a>
+
+          <h1 id="project_title">iot workshop</h1>
+          <h2 id="project_tagline">An introduction to embedded and iot</h2>
+
+          
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <pre><code class="hljs c"><span class="hljs-comment">/*********************************************************************
+
+  Example: Display battery voltage
+
+*********************************************************************/</span>
+
+<span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;Adafruit_FeatherOLED.h&gt;</span></span>
+
+<span class="hljs-meta">#<span class="hljs-meta-keyword">ifdef</span> ARDUINO_SAMD_FEATHER_M0</span>
+  <span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> VBAT_PIN A7</span>
+  <span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> readBatteryVoltage() (analogRead(VBAT_PIN) * 2 * 3.3 / 1024)</span>
+<span class="hljs-meta">#<span class="hljs-meta-keyword">endif</span></span>
+
+<span class="hljs-meta">#<span class="hljs-meta-keyword">ifdef</span> ARDUINO_STM32_FEATHER</span>
+  <span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> VBAT_PIN PA1</span>
+  <span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> readBatteryVoltage() (analogRead(VBAT_PIN) * 2 * 3.3 / 4096)</span>
+<span class="hljs-meta">#<span class="hljs-meta-keyword">endif</span></span>
+
+<span class="hljs-meta">#<span class="hljs-meta-keyword">ifdef</span> ARDUINO_ESP8266_ESP12</span>
+  <span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> VBAT_PIN A0</span>
+  <span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> readBatteryVoltage() (analogRead(VBAT_PIN) * 2 * 3.3 / 1024)</span>
+<span class="hljs-meta">#<span class="hljs-meta-keyword">endif</span></span>
+
+<span class="hljs-meta">#<span class="hljs-meta-keyword">ifdef</span> ARDUINO_FEATHER_ESP32</span>
+  <span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> VBAT_PIN A13</span>
+  <span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> readBatteryVoltage() (analogRead(VBAT_PIN) * 2 * 3.3 / 4096)</span>
+<span class="hljs-meta">#<span class="hljs-meta-keyword">endif</span></span>
+
+Adafruit_FeatherOLED display = Adafruit_FeatherOLED();
+
+<span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">setup</span><span class="hljs-params">()</span> </span>{
+  display.init();
+  display.clearDisplay();
+
+  <span class="hljs-meta">#<span class="hljs-meta-keyword">ifdef</span> ARDUINO_STM32_FEATHER</span>
+  pinMode(VBAT_PIN, INPUT_ANALOG);
+  <span class="hljs-meta">#<span class="hljs-meta-keyword">endif</span></span>
+}
+
+<span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">loop</span><span class="hljs-params">()</span> </span>{
+  updateDisplay();
+}
+
+<span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">updateDisplay</span><span class="hljs-params">()</span> </span>{
+  <span class="hljs-keyword">unsigned</span> <span class="hljs-keyword">long</span> now = millis();
+  <span class="hljs-keyword">static</span> <span class="hljs-keyword">unsigned</span> <span class="hljs-keyword">long</span> last = <span class="hljs-number">0</span>;
+
+  <span class="hljs-keyword">if</span> (now - last &gt;= <span class="hljs-number">1000</span>) {
+    display.clearDisplay();
+    display.setBattery(readBatteryVoltage());
+    display.renderBattery();
+    display.display();
+
+    last = now;
+  }
+}</code></pre>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        
+        <p class="copyright">iot workshop maintained by <a href="http://metcalfbuilt.com">Ian Metcalf</a></p>
+        
+        <p>Published with <a href="https://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+  </body>
+</html>

@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en-US">
+
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,maximum-scale=2">
+    <link rel="stylesheet" type="text/css" media="screen" href="/iot-workshop/css/style.css?v=0.1.0">
+
+
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/ianmetcalf/iot-workshop">View on GitHub</a>
+
+          <h1 id="project_title">Subscribe to an MQTT Broker</h1>
+          <h2 id="project_tagline">An introduction to embedded and iot</h2>
+
+          
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <h2 id="getting-setup">Getting Setup</h2>
+<p><em>NOTE: This step is not needed if you are using the WICED Wifi Feather board</em></p>
+<ul>
+<li><p>Download the <a target="_blank" ref="noopener noreferrer" href="https://pubsubclient.knolleary.net">PubSubClient</a> library from <a target="_blank" ref="noopener noreferrer" href="https://github.com/knolleary/pubsubclient/archive/master.zip">here</a></p>
+</li>
+<li><p>Uncompress the folder and rename it <code>pubsubclient</code></p>
+</li>
+<li><p>Place the folder in your <code>arduinosketchfolder/libraries/</code> folder</p>
+</li>
+</ul>
+<h2 id="code">Code</h2>
+<ul>
+<li><p>Open the Arduino IDE and start a new sketch</p>
+</li>
+<li><p>At the top define the following includes and macros</p>
+</li>
+</ul>
+<pre><code class="hljs c"><span class="hljs-meta">#<span class="hljs-meta-keyword">ifdef</span> ARDUINO_SAMD_FEATHER_M0</span>
+  <span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;WiFi101.h&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-meta-keyword">endif</span></span>
+
+<span class="hljs-meta">#<span class="hljs-meta-keyword">ifdef</span> ARDUINO_ARCH_ESP8266</span>
+  <span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;ESP8266WiFi.h&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-meta-keyword">endif</span></span>
+
+<span class="hljs-meta">#<span class="hljs-meta-keyword">ifdef</span> ARDUINO_ARCH_ESP32</span>
+  <span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;WiFi.h&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-meta-keyword">endif</span></span>
+
+<span class="hljs-meta">#<span class="hljs-meta-keyword">ifndef</span> ARDUINO_ARCH_WICED</span>
+  <span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;PubSubClient.h&gt;</span></span>
+
+  <span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> connectWiFi(args...) WiFi.begin(args)</span>
+  <span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> isWiFiConnected() (WiFi.status() == WL_CONNECTED)</span>
+<span class="hljs-meta">#<span class="hljs-meta-keyword">endif</span></span>
+
+<span class="hljs-meta">#<span class="hljs-meta-keyword">ifdef</span> ARDUINO_ARCH_WICED</span>
+  <span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;adafruit_feather.h&gt;</span></span>
+  <span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;adafruit_mqtt.h&gt;</span></span>
+
+  <span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> connectWiFi(args...) Feather.connect(args)</span>
+  <span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> isWiFiConnected() Feather.connected()</span>
+<span class="hljs-meta">#<span class="hljs-meta-keyword">endif</span></span></code></pre>
+
+<ul>
+<li>Then define the following constants</li>
+</ul>
+<pre><code class="hljs c"><span class="hljs-keyword">const</span> <span class="hljs-keyword">char</span>* ssid = <span class="hljs-string">&quot;iot workshop&quot;</span>;
+<span class="hljs-keyword">const</span> <span class="hljs-keyword">char</span>* password = <span class="hljs-string">&quot;burlingtoncode&quot;</span>;
+
+<span class="hljs-keyword">const</span> <span class="hljs-keyword">char</span>* broker = <span class="hljs-string">&quot;broker.local.lan&quot;</span>;
+<span class="hljs-keyword">const</span> <span class="hljs-keyword">char</span>* clientId = <span class="hljs-string">&quot;&lt;insert name&gt;&quot;</span>;</code></pre>
+
+<ul>
+<li>And initialize the mqtt client</li>
+</ul>
+<pre><code class="hljs c"><span class="hljs-meta">#<span class="hljs-meta-keyword">ifndef</span> ARDUINO_ARCH_WICED</span>
+  WiFiClient wifiClient;
+  <span class="hljs-function">PubSubClient <span class="hljs-title">mqtt</span><span class="hljs-params">(wifiClient)</span></span>;
+
+  <span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> connectMQTT(id, args...) (mqtt.setServer(args), mqtt.connect(id))</span>
+  <span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> subscribeMQTT(topic, handler) (mqtt.setCallback(handler), mqtt.subscribe(topic))</span>
+<span class="hljs-meta">#<span class="hljs-meta-keyword">endif</span></span>
+
+<span class="hljs-meta">#<span class="hljs-meta-keyword">ifdef</span> ARDUINO_ARCH_WICED</span>
+  AdafruitMQTT mqtt;
+
+  <span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> connectMQTT(id, args...) (mqtt.clientID(id), mqtt.connect(args))</span>
+  <span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> subscribeMQTT(topic, handler) mqtt.subscribe(topic, MQTT_QOS_AT_MOST_ONCE, handler)</span>
+<span class="hljs-meta">#<span class="hljs-meta-keyword">endif</span></span></code></pre>
+
+<ul>
+<li>Then define the setup function</li>
+</ul>
+<pre><code class="hljs c"><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">setup</span><span class="hljs-params">()</span> </span>{
+  Serial.begin(<span class="hljs-number">57600</span>);
+
+  <span class="hljs-keyword">while</span> (!Serial) {
+    delay(<span class="hljs-number">1</span>);
+  }
+
+  <span class="hljs-meta">#<span class="hljs-meta-keyword">ifdef</span> ARDUINO_SAMD_FEATHER_M0</span>
+  WiFi.setPins(<span class="hljs-number">8</span>, <span class="hljs-number">7</span>, <span class="hljs-number">4</span>, <span class="hljs-number">2</span>);
+
+  <span class="hljs-keyword">if</span> (WiFi.status() == WL_NO_SHIELD) {
+    Serial.println(<span class="hljs-string">&quot;WiFi not present&quot;</span>);
+    <span class="hljs-keyword">while</span> (<span class="hljs-literal">true</span>);
+  }
+  <span class="hljs-meta">#<span class="hljs-meta-keyword">endif</span></span>
+
+  <span class="hljs-meta">#<span class="hljs-meta-keyword">ifdef</span> ARDUINO_ARCH_ESP8266</span>
+  WiFi.mode(WIFI_STA);
+  <span class="hljs-meta">#<span class="hljs-meta-keyword">endif</span></span>
+
+  Serial.print(<span class="hljs-string">&quot;Connecting to WiFi...&quot;</span>);
+  connectWiFi(ssid, password);
+
+  <span class="hljs-keyword">while</span> (!isWiFiConnected()) {
+    Serial.print(<span class="hljs-string">&apos;.&apos;</span>);
+    delay(<span class="hljs-number">1000</span>);
+  }
+
+  Serial.println(<span class="hljs-string">&quot;done&quot;</span>);
+
+  Serial.print(<span class="hljs-string">&quot;Connecting to MQTT...&quot;</span>);
+  connectMQTT(clientId, broker, <span class="hljs-number">1883</span>);
+
+  <span class="hljs-keyword">while</span> (!mqtt.connected()) {
+    Serial.print(<span class="hljs-string">&apos;.&apos;</span>);
+    delay(<span class="hljs-number">1000</span>);
+  }
+
+  Serial.println(<span class="hljs-string">&quot;done&quot;</span>);
+
+  Serial.print(<span class="hljs-string">&quot;Subscribing to control topic...&quot;</span>);
+  subscribeMQTT(<span class="hljs-string">&quot;control/&lt;insert name&gt;&quot;</span>, handler);
+
+  Serial.println(<span class="hljs-string">&quot;done&quot;</span>);
+}</code></pre>
+
+<ul>
+<li>And a handler for the mqtt subscription</li>
+</ul>
+<pre><code class="hljs c"><span class="hljs-meta">#<span class="hljs-meta-keyword">ifndef</span> ARDUINO_ARCH_WICED</span>
+<span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">handler</span><span class="hljs-params">(<span class="hljs-keyword">char</span>* topic, byte* payload, <span class="hljs-keyword">unsigned</span> <span class="hljs-keyword">int</span> length)</span> </span>{
+  Serial.print(<span class="hljs-string">&quot;Control says: &quot;</span>);
+  <span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> i = <span class="hljs-number">0</span>; i &lt; length; i++) {
+    Serial.print((<span class="hljs-keyword">char</span>)payload[i]);
+  }
+  Serial.println();
+}
+<span class="hljs-meta">#<span class="hljs-meta-keyword">endif</span></span>
+
+<span class="hljs-meta">#<span class="hljs-meta-keyword">ifdef</span> ARDUINO_ARCH_WICED</span>
+<span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">handler</span><span class="hljs-params">(UTF8String topic, UTF8String message)</span> </span>{
+  Serial.print(<span class="hljs-string">&quot;Control says: &quot;</span>);
+  Serial.println(message);
+}
+<span class="hljs-meta">#<span class="hljs-meta-keyword">endif</span></span></code></pre>
+
+<ul>
+<li>Finally define the loop function</li>
+</ul>
+<pre><code class="hljs c"><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">loop</span><span class="hljs-params">()</span> </span>{
+  <span class="hljs-meta">#<span class="hljs-meta-keyword">ifndef</span> ARDUINO_ARCH_WICED</span>
+  mqtt.loop();
+  <span class="hljs-meta">#<span class="hljs-meta-keyword">endif</span></span>
+}</code></pre>
+
+<ul>
+<li>A full example can be found <a href="/iot-workshop/examples/MqttSubscribe">here</a></li>
+</ul>
+<h2 id="try-it">Try It</h2>
+<ul>
+<li><p>Load the program onto the microcontroller using the Arduino IDE</p>
+</li>
+<li><p>Open the MQTT <a target="_blank" ref="noopener noreferrer" href="http://www.hivemq.com/demos/websocket-client/">browser client</a></p>
+</li>
+<li><p>Connect to the broker and publish to your control topic</p>
+</li>
+<li><p>You should see your message in the serial monitor</p>
+</li>
+</ul>
+
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        
+        <p class="copyright">iot workshop maintained by <a href="http://metcalfbuilt.com">Ian Metcalf</a></p>
+        
+        <p>Published with <a href="https://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+  </body>
+</html>

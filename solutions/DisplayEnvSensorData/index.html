@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en-US">
+
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,maximum-scale=2">
+    <link rel="stylesheet" type="text/css" media="screen" href="/iot-workshop/css/style.css?v=0.1.0">
+
+
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/ianmetcalf/iot-workshop">View on GitHub</a>
+
+          <h1 id="project_title">iot workshop</h1>
+          <h2 id="project_tagline">An introduction to embedded and iot</h2>
+
+          
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <pre><code class="hljs c">/*********************************************************************
+
+  Solution: Display Environmental Sensor Data
+
+*********************************************************************/
+
+#ifdef ARDUINO_SAMD_FEATHER_M0
+  #include &lt;WiFi101.h&gt;
+#endif
+
+#ifdef ARDUINO_ARCH_ESP8266
+  #include &lt;ESP8266WiFi.h&gt;
+
+  #define min(a,b) ((a)&lt;(b)?(a):(b))
+#endif
+
+#ifdef ARDUINO_ARCH_ESP32
+  #include &lt;WiFi.h&gt;
+
+  #define min(a,b) ((a)&lt;(b)?(a):(b))
+#endif
+
+#ifndef ARDUINO_ARCH_WICED
+  #include &lt;PubSubClient.h&gt;
+
+  #define connectWiFi(args...) WiFi.begin(args)
+  #define isWiFiConnected() (WiFi.status() == WL_CONNECTED)
+#endif
+
+#ifdef ARDUINO_ARCH_WICED
+  #include &lt;adafruit_feather.h&gt;
+  #include &lt;adafruit_mqtt.h&gt;
+
+  #define connectWiFi(args...) Feather.connect(args)
+  #define isWiFiConnected() Feather.connected()
+#endif
+
+#include &lt;Adafruit_FeatherOLED.h&gt;
+
+const char* ssid = &quot;iot workshop&quot;;
+const char* password = &quot;burlingtoncode&quot;;
+
+const char* broker = &quot;broker.local.lan&quot;;
+const char* clientId = &quot;&lt;insert name&gt;&quot;;
+
+#ifndef ARDUINO_ARCH_WICED
+  WiFiClient wifiClient;
+  PubSubClient mqtt(wifiClient);
+
+  #define connectMQTT(id, args...) (mqtt.setServer(args), mqtt.connect(id))
+  #define subscribeMQTT(topic, handler) (mqtt.setCallback(handler), mqtt.subscribe(topic))
+#endif
+
+#ifdef ARDUINO_ARCH_WICED
+  AdafruitMQTT mqtt;
+
+  #define connectMQTT(id, args...) (mqtt.clientID(id), mqtt.connect(args))
+  #define subscribeMQTT(topic, handler) mqtt.subscribe(topic, MQTT_QOS_AT_MOST_ONCE, handler)
+#endif
+
+Adafruit_FeatherOLED display = Adafruit_FeatherOLED();
+
+#define MAX_SIZE 50
+char lastId[MAX_SIZE];
+char lastMsg[MAX_SIZE];
+
+void setup() {
+  display.init();
+  display.clearDisplay();
+
+  #ifdef ARDUINO_SAMD_FEATHER_M0
+  WiFi.setPins(8, 7, 4, 2);
+
+  if (WiFi.status() == WL_NO_SHIELD) {
+    display.println(&quot;WiFi not present&quot;);
+    display.display();
+    while (true);
+  }
+  #endif
+
+  #ifdef ARDUINO_ARCH_ESP8266
+  WiFi.mode(WIFI_STA);
+  #endif
+
+  display.clearMsgArea();
+  display.print(&quot;Connecting to WiFi...&quot;);
+  display.display();
+
+  connectWiFi(ssid, password);
+
+  do {
+    delay(1000);
+  } while (!isWiFiConnected());
+
+  display.clearMsgArea();
+  display.print(&quot;Connecting to MQTT...&quot;);
+  display.display();
+
+  connectMQTT(clientId, broker, 1883);
+
+  do {
+    delay(1000);
+  } while (!mqtt.connected());
+
+  subscribeMQTT(&quot;data/+/temperature&quot;, handler);
+
+  display.clearMsgArea();
+}
+
+#ifndef ARDUINO_ARCH_WICED
+void handler(char* topic, byte* payload, unsigned int len) {
+  if (strncmp(topic, &quot;data/&quot;, 5) == 0) {
+    splitTopic(lastId, topic + 5, MAX_SIZE);
+    copy(lastMsg, (char*)payload, min(len + 1, MAX_SIZE));
+    displayLastMessage();
+  }
+}
+#endif
+
+#ifdef ARDUINO_ARCH_WICED
+void handler(UTF8String topic, UTF8String message) {
+  if (strncmp(topic.data, &quot;data/&quot;, 5) == 0) {
+    splitTopic(lastId, topic.data + 5, min(topic.len + 1, MAX_SIZE));
+    copy(lastMsg, message.data, min(message.len + 1, MAX_SIZE));
+    displayLastMessage();
+  }
+}
+#endif
+
+void splitTopic(char* next, const char* topic, unsigned int n) {
+  char* ptr = strchr(topic, &apos;/&apos;);
+  copy(next, topic, ptr ? min(n, ptr - topic + 1) : n);
+}
+
+void copy(char* dest, const char* src, unsigned int n) {
+  strncpy(dest, src, n - 1);
+  dest[n - 1] = &apos;\0&apos;;
+}
+
+void displayLastMessage() {
+  display.fillRect(0, 0, 128, 32, BLACK);
+  display.setCursor(0, 0);
+
+  display.println(lastId);
+  display.println(lastMsg);
+
+  display.display();
+}
+
+void loop() {
+  checkConnection();
+
+  #ifndef ARDUINO_ARCH_WICED
+  mqtt.loop();
+  #endif
+}
+
+void checkConnection() {
+  unsigned long now = millis();
+  static unsigned long last = 0;
+
+  if (now - last &gt;= 10000) {
+    if (!isWiFiConnected()) {
+      connectWiFi(ssid, password);
+    }
+
+    if (isWiFiConnected() &amp;&amp; !mqtt.connected()) {
+      connectMQTT(clientId, broker, 1883);
+    }
+
+    last = now;
+  }
+}</code></pre>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        
+        <p class="copyright">iot workshop maintained by <a href="http://metcalfbuilt.com">Ian Metcalf</a></p>
+        
+        <p>Published with <a href="https://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+  </body>
+</html>

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en-US">
+
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,maximum-scale=2">
+    <link rel="stylesheet" type="text/css" media="screen" href="/iot-workshop/css/style.css?v=0.1.0">
+
+
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/ianmetcalf/iot-workshop">View on GitHub</a>
+
+          <h1 id="project_title">iot workshop</h1>
+          <h2 id="project_tagline">An introduction to embedded and iot</h2>
+
+          
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <pre><code class="hljs c"><span class="hljs-comment">/*********************************************************************
+
+  Example: Read from a BMP280 Sensor
+
+*********************************************************************/</span>
+
+<span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;Adafruit_BMP280.h&gt;</span></span>
+
+Adafruit_BMP280 bmp;
+
+<span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">setup</span><span class="hljs-params">()</span> </span>{
+  Serial.begin(<span class="hljs-number">57600</span>);
+
+  <span class="hljs-keyword">while</span> (!Serial) {
+    delay(<span class="hljs-number">1</span>);
+  }
+
+  <span class="hljs-keyword">if</span> (!bmp.begin()) {
+    Serial.println(<span class="hljs-string">&quot;BMP280 not present&quot;</span>);
+    <span class="hljs-keyword">while</span> (<span class="hljs-literal">true</span>);
+  }
+}
+
+<span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">loop</span><span class="hljs-params">()</span> </span>{
+  Serial.print(<span class="hljs-string">&quot;Pressure: &quot;</span>);
+  Serial.print(bmp.readPressure() / <span class="hljs-number">1000</span>);
+  Serial.println(<span class="hljs-string">&quot; kPa&quot;</span>);
+
+  Serial.print(<span class="hljs-string">&quot;Temperature: &quot;</span>);
+  Serial.print(bmp.readTemperature());
+  Serial.println(<span class="hljs-string">&quot; C&quot;</span>);
+
+  delay(<span class="hljs-number">1000</span>);
+}</code></pre>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        
+        <p class="copyright">iot workshop maintained by <a href="http://metcalfbuilt.com">Ian Metcalf</a></p>
+        
+        <p>Published with <a href="https://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+  </body>
+</html>

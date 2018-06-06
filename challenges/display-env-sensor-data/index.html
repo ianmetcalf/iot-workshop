@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en-US">
+
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,maximum-scale=2">
+    <link rel="stylesheet" type="text/css" media="screen" href="/iot-workshop/css/style.css?v=0.1.0">
+
+
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/ianmetcalf/iot-workshop">View on GitHub</a>
+
+          <h1 id="project_title">Display Environmental Sensor Data</h1>
+          <h2 id="project_tagline">An introduction to embedded and iot</h2>
+
+          
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <h2 id="challenge">Challenge</h2>
+<p>Write a program to <a href="/iot-workshop/activities/oled-display">display</a> measurements being published to the
+MQTT broker.</p>
+<h2 id="details">Details</h2>
+<ul>
+<li>Measurements will be published to the topic <code>data/&lt;id&gt;/&lt;measurement&gt;</code><ul>
+<li><code>&lt;id&gt;</code> is a unique identifier for the device that took the measurement</li>
+<li><code>&lt;measurement&gt;</code> is the type of value (i.e. &quot;temperature&quot;, &quot;humidity&quot;, &quot;barometric pressure&quot;, etc)</li>
+</ul>
+</li>
+<li>Messages will be in format <code>&lt;value&gt; &lt;units&gt;</code></li>
+<li>Display the id, value and units for <strong>only</strong> one type of measurement</li>
+</ul>
+<h2 id="bonus">Bonus</h2>
+<p>In addition to displaying readings, the program should publish control messages</p>
+<ul>
+<li>When the &quot;A&quot; button is pressed, an <code>&quot;on&quot;</code> message should be published</li>
+<li>When the &quot;C&quot; button is pressed, an <code>&quot;off&quot;</code> message should be published</li>
+<li>Messages should be published to the <code>control/&lt;id&gt;/led</code> topic<ul>
+<li>Use the <code>&lt;id&gt;</code> of the last reading received</li>
+</ul>
+</li>
+</ul>
+
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        
+        <p class="copyright">iot workshop maintained by <a href="http://metcalfbuilt.com">Ian Metcalf</a></p>
+        
+        <p>Published with <a href="https://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+  </body>
+</html>
