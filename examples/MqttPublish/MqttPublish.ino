@@ -53,10 +53,6 @@ const char* clientId = "<insert name>";
 void setup() {
   Serial.begin(57600);
 
-  while (!Serial) {
-    delay(1);
-  }
-
   #ifdef ARDUINO_SAMD_FEATHER_M0
   WiFi.setPins(8, 7, 4, 2);
 
