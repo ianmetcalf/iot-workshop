@@ -2,6 +2,13 @@
 
 [![Build Status](https://travis-ci.org/ianmetcalf/iot-workshop.svg?branch=master)](https://travis-ci.org/ianmetcalf/iot-workshop)
 
+## Table of Contents
+
+* [Microcontrollers](/#microcontrollers)
+* [Activities](/activities)
+* [Examples](/examples)
+* [Challenges](/challenges)
+
 ## Microcontrollers
 
 ##### [Adafruit M0 Basic Feather](/boards/feather-m0-basic.md)
