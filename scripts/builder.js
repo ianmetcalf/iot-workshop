@@ -26,13 +26,13 @@ builder.ignore([
 ]);
 
 builder.use(code({
-  pattern: 'examples/**/*.ino',
+  pattern: '{examples,solutions}/**/*.ino',
   language: 'c',
 }));
 
 builder.use(renamer({
-  examples: {
-    pattern: 'examples/**/*.md',
+  code: {
+    pattern: '{examples,solutions}/**/*.md',
     rename: 'index.md',
   },
   readme: {

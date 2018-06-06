@@ -14,4 +14,4 @@
 
 ## Next Steps
 
-* Try an [activity](/activities)
+* Try an [activity](/activities) or a [challenge](/challenges)

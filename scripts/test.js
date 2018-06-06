@@ -12,7 +12,7 @@ const boards = [
   'espressif:esp32:featheresp32:FlashFreq=80',
 ];
 
-glob('examples/**/*.ino', (err, files) => {
+glob('{examples,solutions}/**/*.ino', (err, files) => {
   if (err) throw err;
 
   boards.forEach(board => files.forEach(file => {
