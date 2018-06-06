@@ -60,14 +60,15 @@ void setup() {
   WiFi.mode(WIFI_STA);
   #endif
 
+  display.clearMsgArea();
   display.print("Connecting to WiFi...");
   display.display();
 
   connectWiFi(ssid, password);
 
-  while (!isWiFiConnected()) {
+  do {
     delay(1000);
-  }
+  } while (!isWiFiConnected());
 
   display.clearMsgArea();
 }
